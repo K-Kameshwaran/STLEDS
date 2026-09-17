@@ -1,0 +1,74 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.env
+.env.*
+!.env.example
+
+# React/Vite
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Editor
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+
+# Temp local scripts and URLs created during development
+fix_*.py
+test_*.py
+!tests/test_*.py
+debug_*.py
+run_*.py
+run_*.sh
+*url.txt
+
+# Walkthrough and task tracking
+walkthrough.md
+task.md
+implementation_plan.md
+fix_summary.md
+
+# Virtual environments
+backend/venv/
+
+# Environment files
+backend/.env
+frontend/.env
+**/.env
+**/.env.*
+!**/.env.example
+
+# Local storage simulation
+backend/storage/local_r2_bucket/*
+!backend/storage/local_r2_bucket/.gitkeep
+
+# More test/debug scripts
+frontend/test_*.js
+frontend/test_*.html
+test_*.js
+test_*.mjs
+query*.py
+get_*.py
+repair*.py
+e2e_validator.py
+tiny.pdf
+package-lock.json
+package.json
+!frontend/package.json
+!frontend/package-lock.json
+
