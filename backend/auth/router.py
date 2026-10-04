@@ -22,7 +22,7 @@ from backend.limiter import limiter
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/login", response_model=Token)
-@limiter.limit("50/minute")
+@limiter.limit("5/minute")
 def login(request: Request, login_data: LoginRequest, db: Session = Depends(get_db)):
     """
     Login endpoint.

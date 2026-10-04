@@ -1,4 +1,13 @@
 import pytest
+import os
+from dotenv import load_dotenv
+
+# Ensure local test environment uses the .env file
+load_dotenv(os.path.join(os.path.dirname(__file__), "../backend/.env"), override=True)
+os.environ["ENVIRONMENT"] = "development"
+os.environ.pop("KMS_ENDPOINT", None)
+os.environ.pop("R2_ENDPOINT", None)
+
 from backend.limiter import limiter
 
 @pytest.fixture(autouse=True)

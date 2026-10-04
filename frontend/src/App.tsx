@@ -19,12 +19,22 @@ import './App.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
+const DEMO_ROLES = [
+  { name: 'Setter', email: 'setter@test.com', password: 'pass', requiresMfa: false },
+  { name: 'Reviewer', email: 'reviewer@test.com', password: 'pass', requiresMfa: false },
+  { name: 'Controller', email: 'c@test.com', password: 'pass', requiresMfa: true },
+  { name: 'Observer', email: 'o@test.com', password: 'pass', requiresMfa: false },
+  { name: 'Center Superintendent', email: 'center@test.com', password: 'pass', requiresMfa: false },
+  { name: 'Auditor', email: 'auditor@test.com', password: 'pass', requiresMfa: true }
+];
+
 export default function App() {
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
   const [role, setRole] = useState<string | null>(localStorage.getItem('role'));
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('pass');
-  const [mfaCode, setMfaCode] = useState('123456');
+  const [password, setPassword] = useState('');
+  const [mfaCode, setMfaCode] = useState('');
+  const [selectedDemoRole, setSelectedDemoRole] = useState<string | null>(null);
   
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
@@ -285,8 +295,8 @@ export default function App() {
 
   if (!token) {
     return (
-      <div className="app-container">
-        <div className="login-view">
+      <div className="app-container login-layout">
+        <div className="login-view with-demo">
           <div className="login-card">
             <div className="login-header">
               <div className="logo-wrapper">
@@ -324,9 +334,9 @@ export default function App() {
                   className="form-input"
                   value={mfaCode} 
                   onChange={e => setMfaCode(e.target.value)} 
-                  placeholder="6-digit code" 
-                  required 
+                  placeholder="6-digit code (if required)" 
                 />
+                <small style={{ color: 'var(--text-secondary)', display: 'block', marginTop: '0.25rem', fontSize: '0.75rem' }}>Leave empty if MFA is not required.</small>
               </div>
               <button type="submit" className="btn btn-primary" disabled={loading}>
                 {loading ? <span className="spinner"><Activity size={18} /></span> : <><Lock size={18} /> Authenticate Securely</>}
@@ -339,6 +349,37 @@ export default function App() {
               </div>
             )}
           </div>
+          
+          <div className="demo-credentials-panel">
+            <div className="demo-panel-header">
+              <h3><Key size={18} style={{marginRight: '0.5rem', display: 'inline-block', verticalAlign: 'text-bottom'}}/> Demo Login Credentials</h3>
+              <p>Select a role below to populate email and password.</p>
+            </div>
+            <div className="demo-roles-list">
+              {DEMO_ROLES.map((dr) => (
+                <button
+                  type="button"
+                  key={dr.name}
+                  className={`demo-role-btn ${selectedDemoRole === dr.name ? 'selected' : ''}`}
+                  onClick={() => {
+                    setSelectedDemoRole(dr.name);
+                    setEmail(dr.email);
+                    setPassword(dr.password);
+                    setMfaCode(''); // Ensure MFA is strictly wiped
+                  }}
+                >
+                  <span className="demo-role-name">{dr.name}</span>
+                  {dr.requiresMfa && (
+                    <span className="demo-mfa-badge">
+                      <Shield size={12} style={{marginRight: '0.25rem'}}/> 
+                      MFA Required
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
         </div>
       </div>
     );

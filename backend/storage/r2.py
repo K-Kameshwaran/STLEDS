@@ -1,55 +1,85 @@
 """
 File Overview:
-This file simulates Cloudflare R2 object storage operations.
+This file handles object storage operations (AWS S3 / Cloudflare R2).
 
 Important Functions:
-- `upload_object()`: Writes binary data to the simulated R2 storage directory.
-- `download_object()`: Reads binary data from the simulated R2 storage directory.
+- `upload_object()`: Writes binary data to the storage backend.
+- `download_object()`: Reads binary data from the storage backend.
 
 Why it is required:
-In this sandbox environment, we do not have external cloud credentials. However, the architecture
-demands a strict separation between database metadata and raw file storage. By isolating file I/O
-into this module, we can later seamlessly swap `local_r2_bucket` interactions for actual `boto3` calls.
-The storage bucket is strictly PRIVATE. There are no public URLs exposed here.
+In production, we must write securely encrypted PDF files to persistent external storage
+so that serverless/ephemeral instances do not lose data.
 """
 import os
 import uuid
+import boto3
+from botocore.exceptions import ClientError
 
-# Define the local directory acting as the private R2 bucket
+# Define the local directory acting as the fallback private R2 bucket
 STORAGE_DIR = os.path.join(os.path.dirname(__file__), "local_r2_bucket")
-
-# Ensure the storage directory exists
 os.makedirs(STORAGE_DIR, exist_ok=True)
 
-def _get_file_path(object_id: str) -> str:
-    """Helper to resolve the object ID to a local file path."""
-    # Prevent path traversal vulnerabilities by getting basename
-    safe_id = os.path.basename(object_id)
-    return os.path.join(STORAGE_DIR, safe_id)
+def _get_s3_client():
+    """Initializes the S3/R2 client for production."""
+    endpoint_url = os.getenv("R2_ENDPOINT")
+    return boto3.client(
+        's3',
+        endpoint_url=endpoint_url,
+        aws_access_key_id=os.getenv("R2_ACCESS_KEY_ID"),
+        aws_secret_access_key=os.getenv("R2_SECRET_ACCESS_KEY"),
+        region_name=os.getenv("R2_REGION", "auto")
+    )
 
 def upload_object(data: bytes, object_id: str = None) -> str:
     """
-    Simulates uploading an object to a private R2 bucket.
-    Why encryption is performed before storage: The `data` parameter here will ALWAYS be ciphertext.
-    Even if the R2 bucket is compromised, the attacker only gets unreadable binary data.
+    Uploads an object to the storage backend.
     """
     if not object_id:
         object_id = str(uuid.uuid4())
         
-    file_path = _get_file_path(object_id)
+    bucket_name = os.getenv("R2_BUCKET_NAME")
+    env = os.getenv("ENVIRONMENT", "production")
     
-    with open(file_path, "wb") as f:
-        f.write(data)
-        
+    if bucket_name and env != "development":
+        # Production: Cloud Storage
+        try:
+            s3 = _get_s3_client()
+            s3.put_object(Bucket=bucket_name, Key=object_id, Body=data)
+        except ClientError as e:
+            print("S3 UPLOAD ERROR:", e)
+            raise RuntimeError("Cloud storage upload failed.")
+    else:
+        # Local Development Fallback
+        safe_id = os.path.basename(object_id)
+        file_path = os.path.join(STORAGE_DIR, safe_id)
+        with open(file_path, "wb") as f:
+            f.write(data)
+            
     return object_id
 
 def download_object(object_id: str) -> bytes:
     """
-    Simulates downloading an object from a private R2 bucket.
+    Downloads an object from the storage backend.
     """
-    file_path = _get_file_path(object_id)
-    if not os.path.exists(file_path):
-        raise FileNotFoundError(f"Object {object_id} not found in storage.")
-        
-    with open(file_path, "rb") as f:
-        return f.read()
+    bucket_name = os.getenv("R2_BUCKET_NAME")
+    env = os.getenv("ENVIRONMENT", "production")
+    
+    if bucket_name and env != "development":
+        # Production: Cloud Storage
+        try:
+            s3 = _get_s3_client()
+            response = s3.get_object(Bucket=bucket_name, Key=object_id)
+            return response['Body'].read()
+        except ClientError as e:
+            if e.response['Error']['Code'] == 'NoSuchKey':
+                raise FileNotFoundError(f"Object {object_id} not found in cloud storage.")
+            print("S3 DOWNLOAD ERROR:", e)
+            raise RuntimeError("Cloud storage download failed.")
+    else:
+        # Local Development Fallback
+        safe_id = os.path.basename(object_id)
+        file_path = os.path.join(STORAGE_DIR, safe_id)
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"Object {object_id} not found in local storage.")
+        with open(file_path, "rb") as f:
+            return f.read()

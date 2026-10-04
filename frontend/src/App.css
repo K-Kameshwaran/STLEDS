@@ -118,6 +118,108 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* -------------------------------------
+   Demo Login Panel
+-------------------------------------- */
+.login-layout {
+  justify-content: center;
+  align-items: center;
+}
+
+.login-view.with-demo {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: center;
+  gap: 2rem;
+  max-width: 900px;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .login-view.with-demo {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+.demo-credentials-panel {
+  flex: 1;
+  background: rgba(30, 41, 59, 0.4);
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+}
+
+.demo-panel-header {
+  margin-bottom: 1.5rem;
+}
+
+.demo-panel-header h3 {
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.demo-panel-header p {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.demo-roles-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.demo-role-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 1rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: var(--transition);
+  text-align: left;
+}
+
+.demo-role-btn:hover {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.demo-role-btn.selected {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 1px var(--accent-primary);
+}
+
+.demo-role-name {
+  font-weight: 500;
+}
+
+.demo-mfa-badge {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--accent-warning);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+
+/* -------------------------------------
    Forms & Inputs
 -------------------------------------- */
 .form-group {

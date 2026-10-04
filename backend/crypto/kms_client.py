@@ -29,14 +29,19 @@ def get_kms_client():
     """
     Returns an initialized boto3 KMS client.
     """
-    endpoint_url = os.getenv("KMS_ENDPOINT", os.getenv("R2_ENDPOINT", "http://127.0.0.1:5000"))
-    return boto3.client(
-        'kms',
-        region_name=REGION_NAME,
-        endpoint_url=endpoint_url,
-        aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID", "testing"),
-        aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY", "testing")
-    )
+    env = os.getenv("ENVIRONMENT", "production")
+    if env == "development":
+        endpoint_url = os.getenv("KMS_ENDPOINT")
+        return boto3.client(
+            'kms',
+            region_name=REGION_NAME,
+            endpoint_url=endpoint_url,
+            aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID", "testing"),
+            aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY", "testing")
+        )
+    else:
+        # Production: boto3 automatically uses IAM roles / true env vars without overrides
+        return boto3.client('kms', region_name=REGION_NAME)
 
 def kms_encrypt(plaintext: bytes) -> str:
     """
