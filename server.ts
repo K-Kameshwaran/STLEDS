@@ -9,8 +9,8 @@ import path from 'path';
 import { createServer as createViteServer } from 'vite';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'stleds-super-secret-jwt-key-2026';
-const PORT = 3000;
-const HOST = '0.0.0.0';
+const PORT = Number(process.env.PORT) || 3000;
+const HOST = process.env.HOST || '0.0.0.0';
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -615,6 +615,7 @@ async function startServer() {
 
   if (!isProduction) {
     const vite = await createViteServer({
+      root: process.cwd(),
       server: { middlewareMode: true, hmr: false },
       appType: 'spa',
     });

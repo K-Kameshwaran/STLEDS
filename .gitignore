@@ -67,8 +67,5 @@ get_*.py
 repair*.py
 e2e_validator.py
 tiny.pdf
-package-lock.json
-package.json
-!frontend/package.json
-!frontend/package-lock.json
+
 
