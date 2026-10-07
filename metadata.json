@@ -1,0 +1,8 @@
+{
+  "name": "STLEDS: Secure Examination Delivery System",
+  "description": "Cryptographic examination question-paper management system featuring dual-custodian authorization, AES-256-GCM authenticated encryption, forensic watermarking, and tamper-evident audit logs.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
